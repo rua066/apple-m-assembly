@@ -33,38 +33,59 @@ _main:
     add sp, sp, #32
 
 
-    // ==========================================
-    // DEMO 2: ALU - ADD / SUB / MUL
-    // ==========================================
+    // =========================
+// DEMO 2: ALU
+// =========================
 
-    adrp x0, _title2@PAGE
-    add  x0, x0, _title2@PAGEOFF
-    bl   _printf
-
+    // ADD: 20 + 5 = 25
     mov x1, #20
     mov x2, #5
-
     add x3, x1, x2
-    sub x4, x1, x2
-    mul x5, x1, x2
 
-    // 6 variadic arguments
-    // x1, x2, x3, x4, x5, x6
-    sub sp, sp, #48
-
+    sub sp, sp, #32
     str x1, [sp, #0]
     str x2, [sp, #8]
     str x3, [sp, #16]
-    str x4, [sp, #24]
-    str x5, [sp, #32]
 
-    adrp x0, _fmt_alu@PAGE
-    add  x0, x0, _fmt_alu@PAGEOFF
-
+    adrp x0, _fmt_add@PAGE
+    add x0, x0, _fmt_add@PAGEOFF
     bl _printf
 
-    add sp, sp, #48
+    add sp, sp, #32
 
+
+    // SUB: 20 - 5 = 15
+    mov x1, #20
+    mov x2, #5
+    sub x3, x1, x2
+
+    sub sp, sp, #32
+    str x1, [sp, #0]
+    str x2, [sp, #8]
+    str x3, [sp, #16]
+
+    adrp x0, _fmt_sub@PAGE
+    add x0, x0, _fmt_sub@PAGEOFF
+    bl _printf
+
+    add sp, sp, #32
+
+
+    // MUL: 20 * 5 = 100
+    mov x1, #20
+    mov x2, #5
+    mul x3, x1, x2
+
+    sub sp, sp, #32
+    str x1, [sp, #0]
+    str x2, [sp, #8]
+    str x3, [sp, #16]
+
+    adrp x0, _fmt_mul@PAGE
+    add x0, x0, _fmt_mul@PAGEOFF
+    bl _printf
+
+    add sp, sp, #32
 
     // ==========================================
     // DEMO 3: MEMORY - LDR / STR
@@ -242,6 +263,17 @@ _finish:
 // ==========================================
 
 .section __DATA,__data
+
+.section __TEXT,__cstring
+
+_fmt_add:
+    .asciz "ADD: %lld + %lld = %lld\n"
+
+_fmt_sub:
+    .asciz "SUB: %lld - %lld = %lld\n"
+
+_fmt_mul:
+    .asciz "MUL: %lld * %lld = %lld\n"
 
 .p2align 3
 
