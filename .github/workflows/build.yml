@@ -1,0 +1,26 @@
+name: Build Apple M Assembly
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Check architecture
+        run: uname -m
+
+      - name: Build Assembly
+        run: |
+          clang -arch arm64 -c main.s -o main.o
+          clang -arch arm64 main.o -o apple_m_demo
+
+      - name: Run program
+        run: ./apple_m_demo
+
+      - name: Check executable
+        run: file apple_m_demo
