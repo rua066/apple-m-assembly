@@ -6,9 +6,10 @@ _main:
     stp x29, x30, [sp, #-16]!
     mov x29, sp
 
-    // ==============================
+    // ==========================================
     // DEMO 1: REGISTER & MOV
-    // ==============================
+    // ==========================================
+
     adrp x0, _title1@PAGE
     add  x0, x0, _title1@PAGEOFF
     bl   _printf
@@ -17,14 +18,25 @@ _main:
     mov x2, #25
     mov x3, x1
 
+    // Apple ARM64:
+    // variadic arguments of printf go on stack
+    sub sp, sp, #32
+
+    str x1, [sp, #0]
+    str x2, [sp, #8]
+    str x3, [sp, #16]
+
     adrp x0, _fmt_register@PAGE
     add  x0, x0, _fmt_register@PAGEOFF
     bl   _printf
 
+    add sp, sp, #32
 
-    // ==============================
+
+    // ==========================================
     // DEMO 2: ALU - ADD / SUB / MUL
-    // ==============================
+    // ==========================================
+
     adrp x0, _title2@PAGE
     add  x0, x0, _title2@PAGEOFF
     bl   _printf
@@ -36,19 +48,32 @@ _main:
     sub x4, x1, x2
     mul x5, x1, x2
 
+    // 6 variadic arguments
+    // x1, x2, x3, x4, x5, x6
+    sub sp, sp, #48
+
+    str x1, [sp, #0]
+    str x2, [sp, #8]
+    str x3, [sp, #16]
+    str x4, [sp, #24]
+    str x5, [sp, #32]
+
     adrp x0, _fmt_alu@PAGE
     add  x0, x0, _fmt_alu@PAGEOFF
-    bl   _printf
+
+    bl _printf
+
+    add sp, sp, #48
 
 
-    // ==============================
+    // ==========================================
     // DEMO 3: MEMORY - LDR / STR
-    // ==============================
+    // ==========================================
+
     adrp x0, _title3@PAGE
     add  x0, x0, _title3@PAGEOFF
     bl   _printf
 
-    // Load address of memory_value
     adrp x9, _memory_value@PAGE
     add  x9, x9, _memory_value@PAGEOFF
 
@@ -59,15 +84,22 @@ _main:
     // Load value from memory
     ldr x1, [x9]
 
+    // One variadic argument
+    sub sp, sp, #16
+    str x1, [sp]
+
     adrp x0, _fmt_memory@PAGE
     add  x0, x0, _fmt_memory@PAGEOFF
     bl   _printf
 
+    add sp, sp, #16
 
-    // ==============================
+
+    // ==========================================
     // DEMO 4: LOOP & CONDITIONAL BRANCH
     // Sum from 1 to 10
-    // ==============================
+    // ==========================================
+
     adrp x0, _title4@PAGE
     add  x0, x0, _title4@PAGEOFF
     bl   _printf
@@ -85,36 +117,53 @@ loop_start:
     b loop_start
 
 loop_end:
-    mov x1, x9
+
+    // One variadic argument
+    sub sp, sp, #16
+    str x9, [sp]
 
     adrp x0, _fmt_loop@PAGE
     add  x0, x0, _fmt_loop@PAGEOFF
     bl   _printf
 
+    add sp, sp, #16
 
-    // ==============================
-    // DEMO 5: FUNCTION CALL / ABI
-    // ==============================
+
+    // ==========================================
+    // DEMO 5: FUNCTION CALL & ABI
+    // ==========================================
+
     adrp x0, _title5@PAGE
     add  x0, x0, _title5@PAGEOFF
     bl   _printf
 
-    mov x1, #30
-    mov x2, #12
+    // Normal function arguments
+    // x0 = first argument
+    // x1 = second argument
+
+    mov x0, #30
+    mov x1, #12
 
     bl add_numbers
 
-    // Return value is in x0
+    // Result returned in x0
     mov x1, x0
+
+    // One variadic argument for printf
+    sub sp, sp, #16
+    str x1, [sp]
 
     adrp x0, _fmt_function@PAGE
     add  x0, x0, _fmt_function@PAGEOFF
     bl   _printf
 
+    add sp, sp, #16
 
-    // ==============================
-    // END
-    // ==============================
+
+    // ==========================================
+    // FINISH
+    // ==========================================
+
     adrp x0, _finish@PAGE
     add  x0, x0, _finish@PAGEOFF
     bl   _printf
@@ -127,18 +176,24 @@ loop_end:
 
 // ==========================================
 // FUNCTION: add_numbers
-// Input : x1 = a, x2 = b
-// Output: x0 = a + b
+//
+// Input:
+//   x0 = a
+//   x1 = b
+//
+// Output:
+//   x0 = a + b
 // ==========================================
+
 .p2align 2
 
 add_numbers:
-    add x0, x1, x2
+    add x0, x0, x1
     ret
 
 
 // ==========================================
-// STRINGS
+// STRING DATA
 // ==========================================
 
 .section __TEXT,__cstring,cstring_literals
@@ -149,11 +204,13 @@ _title1:
 _fmt_register:
     .asciz "MOV: x1 = %lld, x2 = %lld, copied value x3 = %lld\n"
 
+
 _title2:
     .asciz "\n=== DEMO 2: ALU ===\n"
 
 _fmt_alu:
     .asciz "ADD: %lld + %lld = %lld\nSUB: %lld - %lld = %lld\nMUL: %lld * %lld = %lld\n"
+
 
 _title3:
     .asciz "\n=== DEMO 3: MEMORY ===\n"
@@ -161,11 +218,13 @@ _title3:
 _fmt_memory:
     .asciz "Value stored with STR and loaded with LDR = %lld\n"
 
+
 _title4:
     .asciz "\n=== DEMO 4: LOOP & BRANCH ===\n"
 
 _fmt_loop:
     .asciz "Sum from 1 to 10 = %lld\n"
+
 
 _title5:
     .asciz "\n=== DEMO 5: FUNCTION CALL & ABI ===\n"
@@ -173,16 +232,18 @@ _title5:
 _fmt_function:
     .asciz "add_numbers(30, 12) = %lld\n"
 
+
 _finish:
     .asciz "\n=== Apple M ARM64 Assembly Demo Finished ===\n"
 
 
 // ==========================================
-// DATA
+// MEMORY DATA
 // ==========================================
 
 .section __DATA,__data
 
 .p2align 3
+
 _memory_value:
     .quad 0
