@@ -37,6 +37,10 @@ _main:
 // DEMO 2: ALU
 // =========================
 
+    adrp x0, _title2@PAGE
+    add  x0, x0, _title2@PAGEOFF
+    bl   _printf
+    
     // ADD: 20 + 5 = 25
     mov x1, #20
     mov x2, #5
@@ -228,9 +232,6 @@ _fmt_register:
 
 _title2:
     .asciz "\n=== DEMO 2: ALU ===\n"
-
-_fmt_alu:
-    .asciz "ADD: %lld + %lld = %lld\nSUB: %lld - %lld = %lld\nMUL: %lld * %lld = %lld\n"
 
 
 _title3:
