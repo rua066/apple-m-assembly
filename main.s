@@ -263,8 +263,6 @@ _finish:
 // MEMORY DATA
 // ==========================================
 
-.section __DATA,__data
-
 .section __TEXT,__cstring
 
 _fmt_add:
@@ -275,6 +273,13 @@ _fmt_sub:
 
 _fmt_mul:
     .asciz "MUL: %lld * %lld = %lld\n"
+
+
+// ==========================================
+// MEMORY DATA
+// ==========================================
+
+.section __DATA,__data
 
 .p2align 3
 
